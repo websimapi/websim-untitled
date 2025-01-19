@@ -645,6 +645,24 @@ async function sendToPoGePalace(cardData) {
       backupImageUrl: backupImageUrl,
       origin_trainer: pogepalace.party.client.username
     });
+
+    // Verification: Attempt to fetch the created record
+    console.log('Attempting to verify PoGePalace insertion...');
+    console.log('Created record:', pogeRecord);
+
+    // Wait a moment to allow for data propagation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Fetch all records and find the matching one
+    const verificationRecords = await pogepalace.collection('pogemon')
+      .filter({ id: pogeRecord.id })
+      .getList();
+
+    if (verificationRecords.length > 0) {
+      console.log('Successfully verified PoGePalace record:', verificationRecords[0]);
+    } else {
+      console.warn('Warning: Could not verify PoGePalace record insertion');
+    }
     
     return pogeRecord;
   } catch (error) {
