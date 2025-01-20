@@ -7,22 +7,7 @@ export async function sendToPoGePalace(cardData) {
     const file = new File([blob], `${cardData.name}.png`, { type: 'image/png' });
     const backupImageUrl = await websim.upload(file);
     
-    // Update IndexDB with backup URL
-    if (cardData.id) {
-      const db = getDB();
-      const transaction = db.transaction(['cards'], 'readwrite');
-      const store = transaction.objectStore('cards');
-      const request = store.get(cardData.id);
-      
-      request.onsuccess = () => {
-        const record = request.result;
-        if (record) {
-          record.backupImageUrl = backupImageUrl;
-          store.put(record);
-        }
-      };
-    }
-    
+    // Create record
     const pogeRecord = await pogepalace.collection('pogemon').create({
       name: cardData.name,
       description: cardData.description,
@@ -34,6 +19,7 @@ export async function sendToPoGePalace(cardData) {
       origin_trainer: pogepalace.party.client.username
     });
 
+    // Verify record creation
     console.log('Created record:', pogeRecord);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -43,11 +29,10 @@ export async function sendToPoGePalace(cardData) {
 
     if (verificationRecords.length > 0) {
       console.log('Successfully verified PoGePalace record:', verificationRecords[0]);
+      return pogeRecord;
     } else {
-      console.warn('Warning: Could not verify PoGePalace record insertion');
+      throw new Error('Failed to verify record insertion');
     }
-    
-    return pogeRecord;
   } catch (error) {
     console.error('Error sending to PoGePalace:', error);
     throw error;
