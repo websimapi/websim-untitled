@@ -1,6 +1,6 @@
 let db;
 
-export const initDB = () => {
+export function initDB() {
   const request = indexedDB.open('Pogeflex', 1);
   
   request.onerror = (event) => {
@@ -19,9 +19,13 @@ export const initDB = () => {
   request.onsuccess = (event) => {
     db = event.target.result;
   };
-};
+}
 
-export const saveCard = async (cardData) => {
+export function getDB() {
+  return db;
+}
+
+export async function saveCard(cardData) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['cards'], 'readwrite');
     const store = transaction.objectStore('cards');
@@ -46,9 +50,9 @@ export const saveCard = async (cardData) => {
     };
     request.onerror = () => reject(request.error);
   });
-};
+}
 
-export const getAllCards = async () => {
+export async function getAllCards() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['cards'], 'readonly');
     const store = transaction.objectStore('cards');
@@ -57,9 +61,9 @@ export const getAllCards = async () => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
-};
+}
 
-export const deleteCard = async (id) => {
+export async function deleteCard(id) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['cards'], 'readwrite');
     const store = transaction.objectStore('cards');
@@ -68,6 +72,4 @@ export const deleteCard = async (id) => {
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
   });
-};
-
-export const getDB = () => db;
+}
